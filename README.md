@@ -8,7 +8,7 @@ We'll assume you already know how to build a login+password HTML form which POST
 
 Unless the connection is already secure (that is, tunneled through HTTPS using SSL/TLS), your login form values will be sent in cleartext, which allows anyone eavesdropping on the line between browser and web server will be able to read logins as they pass through. This type of wiretapping is done routinely by governments, but in general we won't address 'owned' wires other than to say this: If you are protecting anything non-trivial, use HTTPS.
 
-In essence, the only **practical** way to protect against wiretapping / packet sniffing during login is by using HTTPS or another certificate-based encryption scheme (for example, [TLS](https://en.wikipedia.org/wiki/Transport_Layer_Security)[TLS]) or a proven &amp; tested challenge-response scheme (for example, the [Diffie-Hellman](http://en.wikipedia.org/wiki/Diffie%E2%80%93Hellman_key_exchange)[Diffie-Hellman]-based SRP). *Any other method can be easily circumvented* by an eavesdropping attacker.
+In essence, the only **practical** way to protect against wiretapping / packet sniffing during login is by using HTTPS or another certificate-based encryption scheme (for example, [TLS](https://en.wikipedia.org/wiki/Transport_Layer_Security)) or a proven &amp; tested challenge-response scheme (for example, the [Diffie-Hellman](http://en.wikipedia.org/wiki/Diffie%E2%80%93Hellman_key_exchange)-based SRP). *Any other method can be easily circumvented* by an eavesdropping attacker.
 
 Of course, if you are willing to get a little bit impractical, you could also employ some form of two-factor authentication scheme (e.g. the Google Authenticator app, a physical 'cold war style' codebook, or an RSA key generator dongle). If applied correctly, this could work even with an unsecured connection, but it's hard to imagine that a dev would be willing to implement two-factor auth but not SSL.
 
@@ -16,15 +16,15 @@ Of course, if you are willing to get a little bit impractical, you could also em
 
 Given the nonzero cost and perceived technical difficulty of setting up an SSL certificate on your website, some developers are tempted to roll their own in-browser hashing or encryption schemes in order to avoid passing cleartext logins over an unsecured wire.
 
-While this is a noble thought, it is essentially useless (and can be a [security flaw](http://stackoverflow.com/questions/1380168/does-it-make-security-sense-to-hash-password-on-client-end)[security flaw]) unless it is combined with one of the above - that is, either securing the line with strong encryption or using a tried-and-tested challenge-response mechanism (if you don't know what that is, just know that it is one of the most difficult to prove, most difficult to design, and most difficult to implement concepts in digital security).
+While this is a noble thought, it is essentially useless (and can be a [security flaw](http://stackoverflow.com/questions/1380168/does-it-make-security-sense-to-hash-password-on-client-end)) unless it is combined with one of the above - that is, either securing the line with strong encryption or using a tried-and-tested challenge-response mechanism (if you don't know what that is, just know that it is one of the most difficult to prove, most difficult to design, and most difficult to implement concepts in digital security).
 
 While it is true that hashing the password *can be* effective against **password disclosure**, it is vulnerable to replay attacks, Man-In-The-Middle attacks / hijackings (if an attacker can inject a few bytes into your unsecured HTML page before it reaches your browser, they can simply comment out the hashing in the JavaScript), or brute-force attacks (since you are handing the attacker both username, salt and hashed password).
 
 **CAPTCHAS against humanity**
 
-[CAPTCHAs](http://en.wikipedia.org/wiki/CAPTCHA)[CAPTCHAs] are meant to thwart one specific category of attack: automated dictionary/brute force trial-and-error with no human operator. There is no doubt that this is a real threat, however there are ways of dealing with it seamlessly that don't require a CAPTCHA, specifically properly designed serverside login throttling schemes - we'll discuss those later.
+[CAPTCHAs](http://en.wikipedia.org/wiki/CAPTCHA) are meant to thwart one specific category of attack: automated dictionary/brute force trial-and-error with no human operator. There is no doubt that this is a real threat, however there are ways of dealing with it seamlessly that don't require a CAPTCHA, specifically properly designed serverside login throttling schemes - we'll discuss those later.
 
-Know that CAPTCHA implementations are not created alike; they often aren't human-solvable, most of them are actually ineffective against bots, all of them are ineffective against cheap third-world labor (according to [OWASP](http://en.wikipedia.org/wiki/OWASP)[OWASP], the current sweatshop rate is $12 per 500 tests), and some implementations may be technically illegal in some countries (see [OWASP Guide To Authentication](http://www.owasp.org/index.php/Guide_to_Authentication)[OWASP Guide To Authentication]). If you must use a CAPTCHA, use Google's [reCAPTCHA](http://en.wikipedia.org/wiki/ReCAPTCHA)[reCAPTCHA], since it is OCR-hard by definition (since it uses already OCR-misclassified book scans) and tries very hard to be user-friendly.
+Know that CAPTCHA implementations are not created alike; they often aren't human-solvable, most of them are actually ineffective against bots, all of them are ineffective against cheap third-world labor (according to [OWASP](http://en.wikipedia.org/wiki/OWASP), the current sweatshop rate is $12 per 500 tests), and some implementations may be technically illegal in some countries (see [OWASP Guide To Authentication](http://www.owasp.org/index.php/Guide_to_Authentication)). If you must use a CAPTCHA, use Google's [reCAPTCHA](http://en.wikipedia.org/wiki/ReCAPTCHA), since it is OCR-hard by definition (since it uses already OCR-misclassified book scans) and tries very hard to be user-friendly.
 
 Personally, I tend to find CAPTCHAS annoying, and use them only as a last resort when a user has failed to login a number of times and throttling delays are maxxed out. This will happen rarely enough to be acceptable, and it strengthens the system as a whole.
 
@@ -36,7 +36,7 @@ So if you can't store the password, how do you check that the login+password com
 
 (Older hashing algorithms, such as MD5 or SHA-1, can be used in a pinch, but they are considered vulnerable or 'broken' due to weaknesses in their designs and thus should be avoided for secure applications.)
 
-Hashing in itself is not sufficient though -- you'll want to add a so-called 'salt' to protect the hash against [rainbow tables](https://en.wikipedia.org/wiki/Rainbow_table)[rainbow tables]. So instead of hashing the password itself (<code>sha256("correcthorsebatterystaple")</code>) you create a random string - the *'salt'*, which by itself should be as long/complex as a strong password, and then you hash the concatenation of the 'salt' and the password, as in <code>sha256("G1fn7Ecl0%iOo23z@pPm52v:correcthorsebatterystaple")</code>. You'll need to store this salt in the database along with the hash, since you'll need to repeat this salt+hash process when authenticating a login+password combination.
+Hashing in itself is not sufficient though -- you'll want to add a so-called 'salt' to protect the hash against [rainbow tables](https://en.wikipedia.org/wiki/Rainbow_table). So instead of hashing the password itself (<code>sha256("correcthorsebatterystaple")</code>) you create a random string - the *'salt'*, which by itself should be as long/complex as a strong password, and then you hash the concatenation of the 'salt' and the password, as in <code>sha256("G1fn7Ecl0%iOo23z@pPm52v:correcthorsebatterystaple")</code>. You'll need to store this salt in the database along with the hash, since you'll need to repeat this salt+hash process when authenticating a login+password combination.
 
 **Session data - "You are logged in as Spiderman69"**
 
@@ -46,7 +46,7 @@ Once the server has verified the login and password against your user database a
   If you are unfamiliar with session data, here's how it works: A single randomly-generated string is stored in an expiring cookie and used to reference a collection of data - the session data - which is stored on the server. If you are using an MVC framework, this is undoubtedly handled already.
 </blockquote>
 
-If at all possible, make sure the session cookie has the secure and HTTP Only flags set when sent to the browser. The httponly flag provides some protection against the cookie being read by a XSS attack. The secure flag ensures that the cookie is only sent back via HTTPS, and therefore protects against network sniffing attacks. The value of the cookie should not be predictable. Where a cookie referencing a non-existent session is presented, its value should be replaced immediately to prevent [session fixation](https://www.owasp.org/index.php/Session_Fixation)[session fixation].
+If at all possible, make sure the session cookie has the secure and HTTP Only flags set when sent to the browser. The httponly flag provides some protection against the cookie being read by a XSS attack. The secure flag ensures that the cookie is only sent back via HTTPS, and therefore protects against network sniffing attacks. The value of the cookie should not be predictable. Where a cookie referencing a non-existent session is presented, its value should be replaced immediately to prevent [session fixation](https://www.owasp.org/index.php/Session_Fixation).
 
 ## PART II: How To Remain Logged In - The Infamous "Remember Me" Checkbox
 
@@ -58,8 +58,8 @@ Of course, some systems can't afford to have *any* accounts hacked; for such sys
 
 **If you DO decide to implement persistent login cookies, this is how you do it:**
 
-- First, take some time to read [Paragon Initiative's article](https://paragonie.com/blog/2015/04/secure-authentication-php-with-long-term-persistence)[Paragon Initiative's article] on the subject. You'll need to get a bunch of elements right, and the article does a great job of explaining each.
-- And just to reiterate one of the most common pitfalls, **DO NOT STORE THE PERSISTENT LOGIN COOKIE (TOKEN) IN YOUR DATABASE, ONLY A HASH OF IT!** The login token is Password Equivalent, so if an attacker got their hands on your database, they could use the tokens to log in to any account, just as if they were cleartext login-password combinations. Therefore, use hashing (according to [http://security.stackexchange.com/a/63438/5002](http://security.stackexchange.com/a/63438/5002)[http://security.stackexchange.com/a/63438/5002] a weak hash will do just fine for this purpose) when storing persistent login tokens.
+- First, take some time to read [Paragon Initiative's article](https://paragonie.com/blog/2015/04/secure-authentication-php-with-long-term-persistence) on the subject. You'll need to get a bunch of elements right, and the article does a great job of explaining each.
+- And just to reiterate one of the most common pitfalls, **DO NOT STORE THE PERSISTENT LOGIN COOKIE (TOKEN) IN YOUR DATABASE, ONLY A HASH OF IT!** The login token is Password Equivalent, so if an attacker got their hands on your database, they could use the tokens to log in to any account, just as if they were cleartext login-password combinations. Therefore, use hashing (according to [http://security.stackexchange.com/a/63438/5002](http://security.stackexchange.com/a/63438/5002) a weak hash will do just fine for this purpose) when storing persistent login tokens.
 
 ## PART III: Using Secret Questions
 
@@ -86,19 +86,19 @@ A final note: always make sure your interface for entering the 'lost password co
 
 ## PART V: Checking Password Strength
 
-First, you'll want to read this small article for a reality check: [The 500 most common passwords](http://www.whatsmypass.com/?p=415)[The 500 most common passwords]
+First, you'll want to read this small article for a reality check: [The 500 most common passwords](http://www.whatsmypass.com/?p=415)
 
 Okay, so maybe the list isn't the *canonical* list of most common passwords on *any* system *anywhere ever*, but it's a good indication of how poorly people will choose their passwords when there is no enforced policy in place. Plus, the list looks frighteningly close to home when you compare it to publicly available analyses of recently stolen passwords.
 
 So: With no minimum password strength requirements, 2% of users use one of the top 20 most common passwords. Meaning: if an attacker gets just 20 attempts, 1 in 50 accounts on your website will be crackable.
 
-Thwarting this requires calculating the entropy of a password and then applying a threshold.  The National Institute of Standards and Technology (NIST) [Special Publication 800-63](http://en.wikipedia.org/wiki/Password_strength#NIST_Special_Publication_800-63)[Special Publication 800-63] has a set of very good suggestions.  That, when combined with a dictionary and keyboard layout analysis (for example, 'qwertyuiop' is a bad password), can [reject 99% of all poorly selected passwords](http://cubicspot.blogspot.com/2012/01/how-to-calculate-password-strength-part.html)[reject 99% of all poorly selected passwords] at a level of 18 bits of entropy.  Simply calculating password strength and [showing a visual strength meter](https://blogs.dropbox.com/tech/2012/04/zxcvbn-realistic-password-strength-estimation/)[showing a visual strength meter] to a user is good, but insufficient.  Unless it is enforced, a lot of users will most likely ignore it.
+Thwarting this requires calculating the entropy of a password and then applying a threshold.  The National Institute of Standards and Technology (NIST) [Special Publication 800-63](http://en.wikipedia.org/wiki/Password_strength#NIST_Special_Publication_800-63) has a set of very good suggestions.  That, when combined with a dictionary and keyboard layout analysis (for example, 'qwertyuiop' is a bad password), can [reject 99% of all poorly selected passwords](http://cubicspot.blogspot.com/2012/01/how-to-calculate-password-strength-part.html) at a level of 18 bits of entropy.  Simply calculating password strength and [showing a visual strength meter](https://blogs.dropbox.com/tech/2012/04/zxcvbn-realistic-password-strength-estimation/) to a user is good, but insufficient.  Unless it is enforced, a lot of users will most likely ignore it.
 
-And for a refreshing take on user-friendliness of high-entropy passwords, Randall Munroe's [Password Strength xkcd](https://xkcd.com/936/)[Password Strength xkcd] is highly recommended.
+And for a refreshing take on user-friendliness of high-entropy passwords, Randall Munroe's [Password Strength xkcd](https://xkcd.com/936/) is highly recommended.
 
 ## PART VI: Much More - Or: Preventing Rapid-Fire Login Attempts
 
-First, have a look at the numbers: [Password Recovery Speeds - How long will your password stand up](http://www.lockdown.co.uk/?pg=combi&amp;s=articles)[Password Recovery Speeds - How long will your password stand up]
+First, have a look at the numbers: [Password Recovery Speeds - How long will your password stand up](http://www.lockdown.co.uk/?pg=combi&amp;s=articles)
 
 If you don't have the time to look through the tables in that link, here's the list of them:
 
@@ -112,7 +112,7 @@ So what can we learn from these numbers? Well, lots, but we can focus on the mos
 Generally speaking, you have three choices that are all effective against brute-force attacks *(and dictionary attacks, but since you are already employing a strong passwords policy, they shouldn't be an issue)*:
 
 - Present a **CAPTCHA** after N failed attempts (annoying as hell and often ineffective -- but I'm repeating myself here)
-- **Locking accounts** and requiring email verification after N failed attempts (this is a [DoS](http://en.wikipedia.org/wiki/Denial-of-service_attack)[DoS] attack waiting to happen)
+- **Locking accounts** and requiring email verification after N failed attempts (this is a [DoS](http://en.wikipedia.org/wiki/Denial-of-service_attack) attack waiting to happen)
 - And finally, **login throttling**: that is, setting a time delay between attempts after N failed attempts (yes, DoS attacks are still possible, but at least they are far less likely and a lot more complicated to pull off).
 
 **Best practice #1:** A short time delay that increases with the number of failed attempts, like:
@@ -172,7 +172,7 @@ Too abstract? Let me rephrase:
 
 Say your site has had an average of 120 bad logins per day over the past 3 months. Using that (running average), your system might set the global limit to 3 times that -- ie. 360 failed attempts over a 24 hour period. Then, if the total number of failed attempts across all accounts exceeds that number within one day (or even better, monitor the rate of acceleration and trigger on a calculated treshold), it activates system-wide login throttling - meaning short delays for ALL users (still, with the exception of cookie logins and/or backup CAPTCHA logins).
 
-I also posted a question with [more details and a really good discussion of how to avoid tricky pitfals](http://stackoverflow.com/questions/479233/what-is-the-best-distributed-brute-force-countermeasure)[more details and a really good discussion of how to avoid tricky pitfals] in fending off distributed brute force attacks
+I also posted a question with [more details and a really good discussion of how to avoid tricky pitfals](http://stackoverflow.com/questions/479233/what-is-the-best-distributed-brute-force-countermeasure) in fending off distributed brute force attacks
 
 ## PART VIII: Two-Factor Authentication and Authentication Providers
 
@@ -182,7 +182,7 @@ Authentication can be completely delegated to a single-sign-on service, where an
 
 ## MUST-READ LINKS About Web Authentication
 
-- [OWASP Guide To Authentication](http://www.owasp.org/index.php/Guide_to_Authentication)[OWASP Guide To Authentication]
-- [Dos and Don’ts of Client Authentication on the Web (very readable MIT research paper)](http://cookies.lcs.mit.edu/pubs/webauth:tr.pdf)[Dos and Don’ts of Client Authentication on the Web (very readable MIT research paper)]
-- [Wikipedia: HTTP cookie](http://en.wikipedia.org/wiki/HTTP_cookie#Drawbacks_of_cookies)[Wikipedia: HTTP cookie]
-- [Personal knowledge questions for fallback authentication: Security questions in the era of Facebook (very readable Berkeley research paper)](http://cups.cs.cmu.edu/soups/2008/proceedings/p13Rabkin.pdf)[Personal knowledge questions for fallback authentication: Security questions in the era of Facebook (very readable Berkeley research paper)]
+- [OWASP Guide To Authentication](http://www.owasp.org/index.php/Guide_to_Authentication)
+- [Dos and Don’ts of Client Authentication on the Web (very readable MIT research paper)](http://cookies.lcs.mit.edu/pubs/webauth:tr.pdf)
+- [Wikipedia: HTTP cookie](http://en.wikipedia.org/wiki/HTTP_cookie#Drawbacks_of_cookies)
+- [Personal knowledge questions for fallback authentication: Security questions in the era of Facebook (very readable Berkeley research paper)](http://cups.cs.cmu.edu/soups/2008/proceedings/p13Rabkin.pdf)
